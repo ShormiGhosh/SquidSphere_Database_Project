@@ -1,0 +1,269 @@
+@font-face {
+    font-family: 'Game Of Squids';
+    src: url('font/Game Of Squids.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Game Of Squids', Arial, sans-serif;
+}
+
+body {
+    overflow: hidden;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.game-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Game Status */
+.game-status {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px 40px;
+    border-radius: 15px;
+    border: 2px solid #d70078;
+    z-index: 100;
+}
+
+.game-status h2 {
+    color: #d70078;
+    font-size: 32px;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(215, 0, 120, 0.8);
+}
+
+.game-status p {
+    color: white;
+    font-size: 18px;
+}
+
+.timer {
+    color: #00ff00;
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.timer.warning {
+    color: #ff9900;
+    animation: pulse 0.5s infinite;
+}
+
+.timer.danger {
+    color: #ff0000;
+    animation: pulse 0.3s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Candies Grid */
+.candies-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+    max-width: 900px;
+}
+
+.candy-slot {
+    background: rgba(255, 255, 255, 0.05);
+    border: 3px solid rgba(215, 0, 120, 0.3);
+    border-radius: 20px;
+    padding: 30px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.candy-slot.working {
+    border-color: #d70078;
+    box-shadow: 0 0 30px rgba(215, 0, 120, 0.5);
+}
+
+.candy-slot.success {
+    border-color: #00ff00;
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+    animation: successGlow 1s ease;
+}
+
+.candy-slot.failed {
+    border-color: #ff0000;
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+    animation: shake 0.5s ease;
+}
+
+@keyframes successGlow {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.player-label {
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* Game Play Area */
+.game-play {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.game-play.active {
+    display: flex;
+}
+
+.candy-image {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(255, 200, 100, 0.5));
+    transition: all 0.5s ease;
+}
+
+.candy-image.broken {
+    filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.8));
+}
+
+.needle-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.needle {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+    animation: needleMove 2s ease-in-out infinite;
+}
+
+@keyframes needleMove {
+    0%, 100% { transform: translate(-25px, -25px) rotate(0deg); }
+    25% { transform: translate(-15px, -20px) rotate(5deg); }
+    50% { transform: translate(-20px, -30px) rotate(-5deg); }
+    75% { transform: translate(-30px, -25px) rotate(3deg); }
+}
+
+/* Result Screen */
+.result-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.result-screen.show {
+    display: flex;
+}
+
+.result-content {
+    text-align: center;
+    padding: 40px;
+    background: linear-gradient(135deg, #16213e, #1a1a2e);
+    border-radius: 20px;
+    border: 3px solid #d70078;
+    box-shadow: 0 0 50px rgba(215, 0, 120, 0.5);
+}
+
+.result-image {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.result-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.result-content h1 {
+    color: #d70078;
+    font-size: 48px;
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px rgba(215, 0, 120, 0.8);
+}
+
+.result-content h1.success {
+    color: #00ff00;
+    text-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+}
+
+.result-content h1.failed {
+    color: #ff0000;
+    text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+.result-content p {
+    color: white;
+    font-size: 24px;
+    margin-bottom: 30px;
+}
+
+.btn-return {
+    padding: 15px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    background-color: #d70078;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(215, 0, 120, 0.3);
+    font-family: 'Game Of Squids', Arial, sans-serif;
+}
+
+.btn-return:hover {
+    background-color: #b8005f;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(215, 0, 120, 0.5);
+}

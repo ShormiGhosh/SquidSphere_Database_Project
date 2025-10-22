@@ -1,0 +1,304 @@
+@font-face {
+    font-family: 'Game Of Squids';
+    src: url('font/Game Of Squids.ttf') format('truetype');
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Game Of Squids', Arial, sans-serif;
+    background: url('images/round6_bg.webp') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+    overflow: hidden;
+    height: 100vh;
+}
+
+.game-container {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+}
+
+/* Game Status */
+.game-status {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px 40px;
+    border-radius: 10px;
+    border: 2px solid #d70078;
+}
+
+.game-status h2 {
+    font-size: 2.5rem;
+    color: #d70078;
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px rgba(215, 0, 120, 0.8);
+}
+
+#statusText {
+    font-size: 1.3rem;
+    color: #fff;
+}
+
+/* Game Play Area */
+.game-play {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 100px;
+}
+
+.game-play.active {
+    display: flex;
+}
+
+/* Players */
+.player {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.5s ease;
+}
+
+.player img {
+    width: 150px;
+    height: 150px;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+    transition: all 0.3s ease;
+}
+
+.player.attacking img {
+    animation: attack 0.5s ease;
+}
+
+.player.defending img {
+    animation: defend 0.5s ease;
+}
+
+.player.defeated {
+    animation: defeat 1s ease-out forwards;
+}
+
+.player-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.player-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+    background: rgba(215, 0, 120, 0.9);
+    padding: 10px 25px;
+    border-radius: 10px;
+    text-shadow: 0 0 10px rgba(215, 0, 120, 0.8);
+}
+
+/* Health Bar */
+.health-bar {
+    width: 200px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #fff;
+}
+
+.health-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #00ff00, #00cc00);
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* VS Text */
+.vs-text {
+    font-size: 4rem;
+    color: #d70078;
+    font-weight: bold;
+    text-shadow: 0 0 30px rgba(215, 0, 120, 1);
+    animation: pulse 2s ease-in-out infinite;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Animations */
+@keyframes attack {
+    0%, 100% { transform: translateX(0) scale(1); }
+    50% { transform: translateX(30px) scale(1.1); }
+}
+
+@keyframes defend {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    50% { transform: translateX(-10px) rotate(-5deg); }
+}
+
+@keyframes defeat {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100px) rotate(90deg);
+        opacity: 0;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Result Screen */
+.result-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.result-screen.active {
+    display: flex;
+}
+
+.result-content {
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    padding: 50px;
+    border-radius: 20px;
+    border: 3px solid #d70078;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(215, 0, 120, 0.5);
+}
+
+#resultTitle {
+    font-size: 3rem;
+    color: #d70078;
+    margin-bottom: 30px;
+    text-shadow: 0 0 20px rgba(215, 0, 120, 0.8);
+}
+
+.winner-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: rgba(215, 0, 120, 0.1);
+    border-radius: 15px;
+    border: 2px solid #d70078;
+}
+
+.winner-display img {
+    width: 120px;
+    height: 120px;
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+}
+
+.winner-info {
+    text-align: left;
+}
+
+.winner-label {
+    font-size: 1.5rem;
+    color: #ffd700;
+    margin-bottom: 10px;
+}
+
+.winner-number {
+    font-size: 3rem;
+    color: #fff;
+    font-weight: bold;
+}
+
+.result-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    font-size: 1.5rem;
+}
+
+.stat-label {
+    color: #fff;
+}
+
+.stat-value {
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    min-width: 200px;
+}
+
+.stat-value.prize {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+    font-size: 1.8rem;
+}
+
+.stat-value.survivors {
+    color: #00ff00;
+    background: rgba(0, 255, 0, 0.1);
+}
+
+.stat-value.eliminated {
+    color: #ff0000;
+    background: rgba(255, 0, 0, 0.1);
+}
+
+.btn-back {
+    background: #d70078;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.3rem;
+    font-family: 'Game Of Squids', Arial, sans-serif;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: #ff0090;
+    box-shadow: 0 0 20px rgba(215, 0, 120, 0.8);
+    transform: scale(1.05);
+}
