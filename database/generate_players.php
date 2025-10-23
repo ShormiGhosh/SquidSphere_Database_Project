@@ -54,100 +54,90 @@ function generateRandomPlayer($player_number, $first_names, $last_names, $nation
 }
 
 // Main execution
-echo "<!DOCTYPE html>";
-echo "<html><head><title>Generate Players</title>";
-echo "<style>
-    body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; padding: 40px; }
-    h1 { color: #d70078; text-align: center; }
-    .container { max-width: 800px; margin: 0 auto; background: #16213e; padding: 30px; border-radius: 10px; }
-    .success { color: #00ff00; }
-    .error { color: #ff0000; }
-    .info { color: #00aaff; margin: 10px 0; }
-    .btn { background: #d70078; color: white; padding: 15px 30px; border: none; border-radius: 5px; 
-           cursor: pointer; font-size: 16px; text-decoration: none; display: inline-block; margin-top: 20px; }
-    .btn:hover { background: #b8005f; }
-</style></head><body>";
+// Check if this is an AJAX request
+$is_ajax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+$is_ajax = $is_ajax || (isset($_GET['ajax']) && $_GET['ajax'] == '1');
 
-echo "<div class='container'>";
-echo "<h1>Generate Players up to 456</h1>";
+if (!$is_ajax) {
+    echo "<!DOCTYPE html>";
+    echo "<html><head><title>Generate Players</title>";
+    echo "<style>
+        body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; padding: 40px; }
+        h1 { color: #d70078; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; background: #16213e; padding: 30px; border-radius: 10px; }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .info { color: #00aaff; margin: 10px 0; }
+        .btn { background: #d70078; color: white; padding: 15px 30px; border: none; border-radius: 5px; 
+               cursor: pointer; font-size: 16px; text-decoration: none; display: inline-block; margin-top: 20px; }
+        .btn:hover { background: #b8005f; }
+    </style></head><body>";
+
+    echo "<div class='container'>";
+    echo "<h1>Generate Players up to 456</h1>";
+}
 
 try {
     $conn = getDBConnection();
     
-    // Check if table exists and is empty or has less than 456 players
-    $result = $conn->query("SELECT COUNT(*) as count FROM players");
-    $row = $result->fetch_assoc();
-    $existing_count = $row['count'];
+    // Delete all existing players first (for fresh start)
+    $conn->query("DELETE FROM players");
     
-    if ($existing_count >= 456) {
-        echo "<p class='error'>⚠️ Database already has {$existing_count} players (maximum is 456).</p>";
-        echo "<p class='info'>Do you want to delete existing players and regenerate?</p>";
-        echo "<form method='POST'>";
-        echo "<button type='submit' name='regenerate' class='btn'>Yes, Delete All & Regenerate</button> ";
-        echo "<a href='../players.php' class='btn' style='background: #555;'>No, Go Back</a>";
-        echo "</form>";
+    if (!$is_ajax) {
+        echo "<p class='info'>Generating 456 new players...</p>";
+    }
+    
+    $stmt = $conn->prepare("INSERT INTO players (player_number, name, age, gender, debt_amount, nationality, alliance_group) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    
+    $success_count = 0;
+    
+    for ($i = 1; $i <= 456; $i++) {
+        $player = generateRandomPlayer($i, $first_names, $last_names, $nationalities, $genders);
         
-        if (isset($_POST['regenerate'])) {
-            $conn->query("DELETE FROM players");
-            echo "<p class='success'>✓ Deleted all existing players. Regenerating...</p>";
-            echo "<script>setTimeout(() => window.location.reload(), 1000);</script>";
-        }
-    } else {
-        echo "<p class='info'>Current players in database: {$existing_count}</p>";
-        echo "<p class='info'>Generating " . (456 - $existing_count) . " new players...</p>";
+        $stmt->bind_param(
+            "ssisssi",
+            $player['player_number'],
+            $player['name'],
+            $player['age'],
+            $player['gender'],
+            $player['debt_amount'],
+            $player['nationality'],
+            $player['alliance_group']
+        );
         
-        $stmt = $conn->prepare("INSERT INTO players (player_number, name, age, gender, debt_amount, nationality, alliance_group) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        
-        $success_count = 0;
-        $error_count = 0;
-        
-        for ($i = $existing_count + 1; $i <= 456; $i++) {
-            $player = generateRandomPlayer($i, $first_names, $last_names, $nationalities, $genders);
-            
-            $stmt->bind_param(
-                "ssisssi",
-                $player['player_number'],
-                $player['name'],
-                $player['age'],
-                $player['gender'],
-                $player['debt_amount'],
-                $player['nationality'],
-                $player['alliance_group']
-            );
-            
-            if ($stmt->execute()) {
-                $success_count++;
-                echo "<p class='success'>✓ Player #{$player['player_number']}: {$player['name']} - {$player['nationality']}</p>";
-            } else {
-                $error_count++;
-                echo "<p class='error'>✗ Failed to add player #{$player['player_number']}: " . $stmt->error . "</p>";
+        if ($stmt->execute()) {
+            $success_count++;
+            if (!$is_ajax) {
+                echo "<p class='success'>✓ Player #{$player['player_number']}: {$player['name']}</p>";
+                flush();
+                ob_flush();
             }
-            
-            // Flush output for real-time display
-            flush();
-            ob_flush();
-            usleep(10000); // Small delay for visual effect
         }
-        
-        $stmt->close();
-        
+    }
+    
+    $stmt->close();
+    
+    if (!$is_ajax) {
         echo "<hr style='border-color: #d70078; margin: 30px 0;'>";
         echo "<h2 style='color: #d70078;'>Summary</h2>";
         echo "<p class='success'>✓ Successfully generated: {$success_count} players</p>";
-        if ($error_count > 0) {
-            echo "<p class='error'>✗ Failed: {$error_count} players</p>";
-        }
-        echo "<p class='info'>Total players in database: " . ($existing_count + $success_count) . "</p>";
-        
         echo "<a href='../players.php' class='btn'>View Players</a>";
+    } else {
+        echo json_encode(['success' => true, 'count' => $success_count]);
     }
     
     closeDBConnection($conn);
     
 } catch (Exception $e) {
-    echo "<p class='error'>Error: " . $e->getMessage() . "</p>";
+    if (!$is_ajax) {
+        echo "<p class='error'>Error: " . $e->getMessage() . "</p>";
+    } else {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
 }
 
-echo "</div>";
-echo "</body></html>";
+if (!$is_ajax) {
+    echo "</div>";
+    echo "</body></html>";
+}
 ?>

@@ -1,0 +1,370 @@
+/* Game Control Page Styling */
+
+/* Status Dashboard */
+.status-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.status-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.status-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(215, 0, 120, 0.3);
+}
+
+.alive-card {
+    border-color: #4CAF50;
+}
+
+.eliminated-card {
+    border-color: #f44336;
+}
+
+.prize-card {
+    border-color: #ffd700;
+}
+
+.phase-card {
+    border-color: #d70078;
+}
+
+.status-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.status-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+    margin: 10px 0;
+    font-family: 'Game Of Squids', sans-serif;
+}
+
+.status-label {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Winner Display */
+.winner-display {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    border: 3px solid #ffd700;
+    border-radius: 20px;
+    padding: 40px;
+    margin: 30px 0;
+    text-align: center;
+    animation: winnerGlow 2s infinite;
+}
+
+@keyframes winnerGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+    50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+}
+
+.winner-display h2 {
+    color: #000;
+    font-size: 48px;
+    margin-bottom: 20px;
+    font-family: 'Game Of Squids', sans-serif;
+}
+
+.winner-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.winner-number {
+    font-size: 64px;
+    font-weight: bold;
+    color: #d70078;
+    font-family: 'Game Of Squids', sans-serif;
+}
+
+.winner-card h3 {
+    color: #000;
+    font-size: 32px;
+    margin: 15px 0;
+}
+
+.winner-details {
+    margin: 20px 0;
+    text-align: left;
+}
+
+.winner-details p {
+    color: #333;
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.winner-prize {
+    background: linear-gradient(135deg, #d70078, #ff1493);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.winner-prize h2 {
+    color: white;
+    font-size: 28px;
+    margin: 0;
+}
+
+/* Game Rounds */
+.game-rounds {
+    margin: 40px 0;
+}
+
+.game-rounds h2 {
+    color: white;
+    font-size: 32px;
+    margin-bottom: 30px;
+    font-family: 'Game Of Squids', sans-serif;
+    text-align: center;
+}
+
+.round-card {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #d70078;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.round-card:hover {
+    border-color: #ff1493;
+    box-shadow: 0 5px 20px rgba(215, 0, 120, 0.4);
+}
+
+/* Locked round styling */
+.round-card[style*="opacity: 0.5"] {
+    background: rgba(0, 0, 0, 0.7);
+    border-color: #555 !important;
+    cursor: not-allowed;
+}
+
+.round-card[style*="opacity: 0.5"]::after {
+    content: '🔒 LOCKED';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.final-round {
+    border-color: #ffd700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+}
+
+.round-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.round-header h3 {
+    color: white;
+    font-size: 24px;
+    margin: 0;
+    font-family: 'Game Of Squids', sans-serif;
+}
+
+.round-number {
+    background: #d70078;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.round-description {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.round-controls {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.input-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.input-group label {
+    display: block;
+    color: white;
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #d70078;
+}
+
+.auto-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.auto-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.eliminate-btn {
+    background: linear-gradient(135deg, #d70078, #ff1493);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Game Of Squids', sans-serif;
+}
+
+.eliminate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(215, 0, 120, 0.5);
+}
+
+.winner-btn {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #000;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Game Of Squids', sans-serif;
+}
+
+.winner-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5);
+}
+
+/* Quick Actions */
+.quick-actions {
+    margin: 40px 0;
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+}
+
+.quick-actions h2 {
+    color: white;
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-family: 'Game Of Squids', sans-serif;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.action-btn.danger {
+    border-color: #f44336;
+    color: #f44336;
+}
+
+.action-btn.danger:hover {
+    background: rgba(244, 67, 54, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .status-dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .round-controls {
+        flex-direction: column;
+    }
+    
+    .input-group {
+        width: 100%;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-btn {
+        width: 100%;
+    }
+}

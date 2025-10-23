@@ -57,25 +57,85 @@ function endGame() {
     gameActive = false;
     
     setTimeout(() => {
-        showResult();
+        executeElimination();
     }, 1500);
 }
 
+// Execute real elimination automatically
+async function executeElimination() {
+    console.log('🍪 Auto-executing elimination for Honeycomb...');
+    
+    try {
+        const statusResponse = await fetch('api/game_status.php');
+        const statusData = await statusResponse.json();
+        
+        if (!statusData.success) {
+            showResult('Error', 0, 0);
+            return;
+        }
+        
+        const aliveCount = statusData.aliveCount;
+        const targetPlayers = 106;
+        const eliminateCount = Math.max(0, aliveCount - targetPlayers);
+        
+        if (eliminateCount === 0) {
+            showResult('Already at target', aliveCount, 0);
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('gameRound', 'Honeycomb');
+        formData.append('eliminateCount', eliminateCount);
+        
+        const response = await fetch('api/eliminate_players.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Mark round as complete
+            const markCompleteData = new FormData();
+            markCompleteData.append('roundNumber', 2);
+            await fetch('api/mark_round_complete.php', {
+                method: 'POST',
+                body: markCompleteData
+            });
+            
+            showResult('Success', data.remainingCount, data.eliminatedCount);
+        } else {
+            showResult('Error: ' + data.error, 0, 0);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showResult('Server error', 0, 0);
+    }
+}
+
 // Show result screen
-function showResult() {
+function showResult(status, survivorCount, eliminatedCount) {
     const resultScreen = document.getElementById('resultScreen');
     const resultTitle = document.getElementById('resultTitle');
     const resultMessage = document.getElementById('resultMessage');
     const resultImage = document.getElementById('resultImage');
     
-    resultTitle.textContent = 'Game Complete!';
-    resultTitle.className = '';
-    resultMessage.innerHTML = `
-        <strong style="color: #00ff00;">Survivors:</strong> ${survivors} players<br>
-        <strong style="color: #ff0000;">Eliminated:</strong> ${eliminated} players
-    `;
+    if (status !== 'Success') {
+        resultTitle.textContent = status;
+        resultMessage.innerHTML = `<p>Click below to return</p>`;
+    } else {
+        resultTitle.textContent = 'Round 2 Complete!';
+        resultMessage.innerHTML = `
+            <h2>Honeycomb</h2>
+            <div style="margin: 20px 0; font-size: 24px;">
+                <strong>Eliminated:</strong> ${eliminatedCount} players<br>
+                <strong>Survivors:</strong> ${survivorCount} players
+            </div>
+            <p style="color: #d70078;">Eliminations recorded in database!</p>
+        `;
+    }
     
-    // Show success/fail images
+    // Show candy images
     let imagesHTML = '';
     candySlots.forEach((slot) => {
         const img = slot.querySelector('.candy-image');

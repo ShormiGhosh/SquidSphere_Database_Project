@@ -41,7 +41,7 @@
             <div class="result-content">
                 <h1 id="resultTitle"></h1>
                 <p id="resultMessage"></p>
-                <button class="btn-return" onclick="window.location.href='players.php'">Return to Players</button>
+                <button class="btn-return" onclick="window.location.href='games.php'">Return to Games</button>
             </div>
         </div>
     </div>

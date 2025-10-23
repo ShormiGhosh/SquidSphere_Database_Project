@@ -13,10 +13,11 @@
             <span class="logo-text">SquidSphere</span>
         </div>
         <ul class="nav-links">
-            <li><a href="index.php">Home</a></li>
             <li><a href="players.php" class="active">Players</a></li>
             <li><a href="search.php">Search</a></li>
             <li><a href="games.php">Gameplay</a></li>
+            <li><a href="dashboard.php">Dashboard</a></li>
+            <li><a href="staff_visual.php">Staff</a></li>
         </ul>
     </nav>
 

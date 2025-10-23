@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Team Formation</title>
+</head>
+<body>
+    <h1>Test Team Formation API</h1>
+    <button onclick="testFormation()">Test Debt-Based Formation</button>
+    <pre id="result"></pre>
+    
+    <script>
+        async function testFormation() {
+            const formData = new FormData();
+            formData.append('strategy', 'debt');
+            
+            const response = await fetch('api/form_teams.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>

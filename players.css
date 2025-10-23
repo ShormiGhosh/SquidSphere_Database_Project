@@ -170,6 +170,28 @@ body {
     background: rgba(255, 255, 255, 0.1);
 }
 
+/* Eliminated Player Styling - Like in Squid Game */
+.player-tile.status-eliminated {
+    opacity: 0.3;
+    filter: grayscale(100%);
+    border-color: rgba(128, 128, 128, 0.3);
+}
+
+.player-tile.status-eliminated:hover {
+    opacity: 0.5;
+    border-color: rgba(128, 128, 128, 0.5);
+    box-shadow: 0 8px 25px rgba(128, 128, 128, 0.3);
+}
+
+.player-tile.status-eliminated .player-image {
+    filter: grayscale(100%) drop-shadow(0 0 10px rgba(128, 128, 128, 0.2));
+}
+
+.player-tile.status-eliminated .player-number,
+.player-tile.status-eliminated .player-name {
+    color: rgba(255, 255, 255, 0.5);
+}
+
 .player-image {
     width: 120px;
     height: 120px;

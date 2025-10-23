@@ -123,21 +123,97 @@ function endGame() {
         statusText.textContent = 'Player 456 wins all marbles!';
     }
     
-    // Show result after delay
-    setTimeout(showResult, 1000);
+    // Auto-execute elimination after animation completes
+    setTimeout(() => executeElimination(), 1000);
 }
 
-function showResult() {
+// Auto-execute elimination logic
+async function executeElimination() {
+    console.log('Executing Marbles elimination...');
+    
+    try {
+        // Check if round is already completed
+        const roundCheckResponse = await fetch('api/check_round_status.php?roundNumber=4');
+        const roundCheckData = await roundCheckResponse.json();
+        
+        if (roundCheckData.success && roundCheckData.isComplete) {
+            console.log('Round 4 already completed, skipping elimination');
+            const statusResponse = await fetch('api/game_status.php');
+            const statusData = await statusResponse.json();
+            showResult(statusData, statusData.aliveCount, 0);
+            return;
+        }
+        
+        // Get current game status
+        const statusResponse = await fetch('api/game_status.php');
+        const statusData = await statusResponse.json();
+        
+        if (!statusData.success) {
+            alert('Error loading game status!');
+            showResult(statusData, 0, 0);
+            return;
+        }
+        
+        const aliveCount = statusData.aliveCount;
+        const targetPlayers = 28; // Round 4 target
+        const eliminateCount = Math.max(0, aliveCount - targetPlayers);
+        
+        console.log(`Current alive: ${aliveCount}, Target: ${targetPlayers}, To eliminate: ${eliminateCount}`);
+        
+        // If already at target, just show results
+        if (eliminateCount === 0) {
+            showResult(statusData, aliveCount, 0);
+            return;
+        }
+        
+        // Execute elimination
+        const formData = new FormData();
+        formData.append('gameRound', 'Marbles');
+        formData.append('eliminateCount', eliminateCount);
+        
+        const response = await fetch('api/eliminate_players.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log(`Eliminated ${data.eliminatedCount}, ${data.remainingCount} survivors`);
+            
+            // Mark round as complete
+            const markCompleteData = new FormData();
+            markCompleteData.append('roundNumber', 4);
+            await fetch('api/mark_round_complete.php', {
+                method: 'POST',
+                body: markCompleteData
+            });
+            
+            // Show result screen with actual database numbers
+            showResult(statusData, data.remainingCount, data.eliminatedCount);
+        } else {
+            alert('Error eliminating players!');
+            showResult(statusData, aliveCount, 0);
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error executing elimination!');
+        showResult({}, 0, 0);
+    }
+}
+
+function showResult(status, survivorCount, eliminatedCount) {
     const resultScreen = document.getElementById('resultScreen');
     const resultTitle = document.getElementById('resultTitle');
     const winnerImage = document.getElementById('winnerImage');
     const winnerNumber = document.getElementById('winnerNumber');
     const winnerMarbles = document.getElementById('winnerMarbles');
     
-    resultTitle.textContent = 'Marbles Champion!';
+    resultTitle.textContent = 'Marbles Complete!';
     winnerImage.src = winner.image;
-    winnerNumber.textContent = 'Player ' + winner.number;
-    winnerMarbles.textContent = '20 Marbles';
+    winnerNumber.textContent = `Survivors: ${survivorCount}`;
+    winnerMarbles.textContent = `Eliminated: ${eliminatedCount}`;
     
     resultScreen.classList.add('active');
 }

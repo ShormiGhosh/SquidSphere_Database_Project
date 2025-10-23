@@ -119,8 +119,10 @@ function createPlayerTile(player) {
     // Get random image for display
     const image = getRandomPlayerImage();
     
-    // Add status class for styling
-    tile.classList.add('status-' + player.status);
+    // Add status class for styling (eliminated players will be dimmed)
+    if (player.status === 'eliminated') {
+        tile.classList.add('status-eliminated');
+    }
     
     tile.innerHTML = `
         <img src="${image}" alt="Player ${player.player_number}" class="player-image">

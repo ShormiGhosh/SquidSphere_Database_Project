@@ -191,19 +191,93 @@ function endGame() {
     
     statusText.textContent = 'Game Over!';
     
-    setTimeout(showResult, 800);
+    // Auto-execute elimination after animation completes
+    setTimeout(() => executeElimination(), 1000);
 }
 
-function showResult() {
+// Auto-execute elimination logic
+async function executeElimination() {
+    console.log('Executing Glass Bridge elimination...');
+    
+    try {
+        // Check if round is already completed
+        const roundCheckResponse = await fetch('api/check_round_status.php?roundNumber=5');
+        const roundCheckData = await roundCheckResponse.json();
+        
+        if (roundCheckData.success && roundCheckData.isComplete) {
+            console.log('Round 5 already completed, skipping elimination');
+            const statusResponse = await fetch('api/game_status.php');
+            const statusData = await statusResponse.json();
+            showResult(statusData, statusData.aliveCount, 0);
+            return;
+        }
+        
+        // Get current game status
+        const statusResponse = await fetch('api/game_status.php');
+        const statusData = await statusResponse.json();
+        
+        if (!statusData.success) {
+            alert('Error loading game status!');
+            showResult(statusData, 0, 0);
+            return;
+        }
+        
+        const aliveCount = statusData.aliveCount;
+        const targetPlayers = 2; // Round 5 target
+        const eliminateCount = Math.max(0, aliveCount - targetPlayers);
+        
+        console.log(`Current alive: ${aliveCount}, Target: ${targetPlayers}, To eliminate: ${eliminateCount}`);
+        
+        // If already at target, just show results
+        if (eliminateCount === 0) {
+            showResult(statusData, aliveCount, 0);
+            return;
+        }
+        
+        // Execute elimination
+        const formData = new FormData();
+        formData.append('gameRound', 'Glass Bridge');
+        formData.append('eliminateCount', eliminateCount);
+        
+        const response = await fetch('api/eliminate_players.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log(`Eliminated ${data.eliminatedCount}, ${data.remainingCount} survivors`);
+            
+            // Mark round as complete
+            const markCompleteData = new FormData();
+            markCompleteData.append('roundNumber', 5);
+            await fetch('api/mark_round_complete.php', {
+                method: 'POST',
+                body: markCompleteData
+            });
+            
+            // Show result screen with actual database numbers
+            showResult(statusData, data.remainingCount, data.eliminatedCount);
+        } else {
+            alert('Error eliminating players!');
+            showResult(statusData, aliveCount, 0);
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error executing elimination!');
+        showResult({}, 0, 0);
+    }
+}
+
+function showResult(status, survivorCount, eliminatedCount) {
     const resultScreen = document.getElementById('resultScreen');
     const survivorsSpan = document.getElementById('survivors');
     const eliminatedSpan = document.getElementById('eliminated');
     
-    const survivors = players.filter(p => !p.eliminated).length;
-    const eliminated = players.length - survivors;
-    
-    survivorsSpan.textContent = `${survivors} players`;
-    eliminatedSpan.textContent = `${eliminated} players`;
+    survivorsSpan.textContent = survivorCount;
+    eliminatedSpan.textContent = eliminatedCount;
     
     resultScreen.classList.add('active');
 }

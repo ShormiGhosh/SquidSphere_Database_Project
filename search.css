@@ -1,0 +1,266 @@
+/* Search Panel Styling */
+.search-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid #d70078;
+    border-radius: 15px;
+    padding: 30px;
+    margin: 30px auto;
+    max-width: 1200px;
+    box-shadow: 0 0 30px rgba(215, 0, 120, 0.3);
+}
+
+.filter-section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filter-section:last-of-type {
+    border-bottom: none;
+}
+
+.filter-section h3 {
+    color: #d70078;
+    font-size: 20px;
+    margin-bottom: 15px;
+    font-family: 'Game Of Squids', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group.full-width {
+    flex: 1 1 100%;
+}
+
+.filter-group label {
+    color: white;
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 12px 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: #d70078;
+    box-shadow: 0 0 15px rgba(215, 0, 120, 0.5);
+}
+
+.filter-group input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.filter-group select {
+    cursor: pointer;
+}
+
+.filter-group select option {
+    background: #1a0010;
+    color: white;
+    padding: 10px;
+}
+
+.filter-group select optgroup {
+    background: #2a0020;
+    color: #d70078;
+    font-weight: bold;
+}
+
+/* Button Row */
+.button-row {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.search-btn,
+.reset-btn {
+    padding: 15px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Game Of Squids', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.search-btn {
+    background: linear-gradient(135deg, #d70078, #ff1493);
+    color: white;
+    box-shadow: 0 5px 20px rgba(215, 0, 120, 0.4);
+}
+
+.search-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(215, 0, 120, 0.6);
+}
+
+.reset-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.reset-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Results Section */
+.results-section {
+    margin: 40px auto;
+    max-width: 1400px;
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.results-header h2 {
+    color: white;
+    font-family: 'Game Of Squids', sans-serif;
+    font-size: 32px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.results-header h2 span {
+    color: #d70078;
+    font-size: 40px;
+}
+
+/* Query Info Box */
+.query-info {
+    margin: 20px auto;
+    max-width: 1200px;
+}
+
+.query-box {
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #d70078;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 15px;
+}
+
+.query-box strong {
+    color: #d70078;
+    font-size: 16px;
+    display: block;
+    margin-bottom: 10px;
+    font-family: 'Game Of Squids', sans-serif;
+}
+
+.sql-code {
+    background: rgba(0, 0, 0, 0.8);
+    color: #00ff00;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.sql-keyword {
+    color: #ff69b4;
+    font-weight: bold;
+}
+
+/* No Results Message */
+.no-results {
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+    font-size: 18px;
+    padding: 60px 20px;
+    font-style: italic;
+}
+
+/* Players Grid (reuse from players.css) */
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    padding: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .filter-row {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        min-width: 100%;
+    }
+    
+    .button-row {
+        flex-direction: column;
+    }
+    
+    .search-btn,
+    .reset-btn {
+        width: 100%;
+    }
+    
+    .players-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animation for results appearing */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.player-tile {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.player-tile:nth-child(1) { animation-delay: 0.05s; }
+.player-tile:nth-child(2) { animation-delay: 0.1s; }
+.player-tile:nth-child(3) { animation-delay: 0.15s; }
+.player-tile:nth-child(4) { animation-delay: 0.2s; }
+.player-tile:nth-child(5) { animation-delay: 0.25s; }

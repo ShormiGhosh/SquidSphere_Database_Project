@@ -117,6 +117,40 @@
         animation: zoomIn 2s ease-out forwards;
     }
 
+    /* Enter Button */
+    .enter-button {
+        margin-top: 80px;
+        padding: 15px 45px;
+        font-size: 1.6rem;
+        font-weight: bold;
+        color: white;
+        background: #d70078;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 30px rgba(215, 0, 120, 0.6);
+        font-family: 'Game Of Squids', Arial, sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+    }
+
+    .enter-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 50px rgba(215, 0, 120, 0.9);
+        background: #ff0090;
+    }
+
+    .enter-button:active {
+        transform: scale(0.95);
+    }
+
+    .enter-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: scale(1);
+    }
+
     @keyframes zoomIn {
         0% {
             opacity: 0;

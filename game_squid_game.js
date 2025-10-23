@@ -96,19 +96,75 @@ function endGame() {
         statusText.textContent = 'Player 456 wins!';
     }
     
-    // Show result after animation
-    setTimeout(showResult, 2000);
+    // Auto-execute winner declaration after animation
+    setTimeout(() => executeWinnerDeclaration(), 2000);
 }
 
-function showResult() {
+// Auto-execute winner declaration
+async function executeWinnerDeclaration() {
+    console.log('Declaring final winner...');
+    
+    try {
+        // Check if round is already completed
+        const roundCheckResponse = await fetch('api/check_round_status.php?roundNumber=6');
+        const roundCheckData = await roundCheckResponse.json();
+        
+        if (roundCheckData.success && roundCheckData.isComplete) {
+            console.log('Round 6 already completed, winner already declared');
+            const statusResponse = await fetch('api/game_status.php');
+            const statusData = await statusResponse.json();
+            if (statusData.winner) {
+                showResult(statusData.winner);
+            } else {
+                showResult(null);
+            }
+            return;
+        }
+        
+        const response = await fetch('api/set_winner.php', {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        console.log('Winner API Response:', data);
+        
+        if (data.success) {
+            // Mark round as complete
+            const markCompleteData = new FormData();
+            markCompleteData.append('roundNumber', 6);
+            await fetch('api/mark_round_complete.php', {
+                method: 'POST',
+                body: markCompleteData
+            });
+            
+            // Show result screen with winner info
+            showResult(data.winner);
+        } else {
+            alert('Error declaring winner!');
+            showResult(null);
+        }
+        
+    } catch (error) {
+        console.error('Error declaring winner:', error);
+        alert('Error declaring winner!');
+        showResult(null);
+    }
+}
+
+function showResult(winnerData) {
     const resultScreen = document.getElementById('resultScreen');
     const resultTitle = document.getElementById('resultTitle');
     const winnerImage = document.getElementById('winnerImage');
     const winnerNumber = document.getElementById('winnerNumber');
     
-    resultTitle.textContent = 'We Have a Winner!';
+    resultTitle.textContent = 'Final Winner Declared!';
     winnerImage.src = winner.image;
-    winnerNumber.textContent = 'Player ' + winner.number;
+    
+    if (winnerData) {
+        winnerNumber.textContent = `Winner: Player ${winnerData.player_number} - ${winnerData.name}`;
+    } else {
+        winnerNumber.textContent = 'Winner declared!';
+    }
     
     resultScreen.classList.add('active');
 }
