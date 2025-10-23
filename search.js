@@ -100,17 +100,18 @@ function createPlayerTile(player) {
 function displayQueryInfo(sql, count) {
     const queryInfo = document.getElementById('queryInfo');
     
-    // Format SQL for display
+    // Format SQL for display (order matters - replace longer phrases first!)
     const formattedSQL = sql
+        .replace(/ORDER BY/gi, '<span class="sql-keyword">ORDER BY</span>')
+        .replace(/GROUP BY/gi, '<span class="sql-keyword">GROUP BY</span>')
+        .replace(/NOT IN/gi, '<span class="sql-keyword">NOT IN</span>')
         .replace(/SELECT/gi, '<span class="sql-keyword">SELECT</span>')
         .replace(/FROM/gi, '<span class="sql-keyword">FROM</span>')
         .replace(/WHERE/gi, '<span class="sql-keyword">WHERE</span>')
         .replace(/AND/gi, '<span class="sql-keyword">AND</span>')
         .replace(/OR/gi, '<span class="sql-keyword">OR</span>')
         .replace(/IN/gi, '<span class="sql-keyword">IN</span>')
-        .replace(/NOT IN/gi, '<span class="sql-keyword">NOT IN</span>')
         .replace(/LIKE/gi, '<span class="sql-keyword">LIKE</span>')
-        .replace(/ORDER BY/gi, '<span class="sql-keyword">ORDER BY</span>')
         .replace(/LIMIT/gi, '<span class="sql-keyword">LIMIT</span>')
         .replace(/UNION/gi, '<span class="sql-keyword">UNION</span>')
         .replace(/EXISTS/gi, '<span class="sql-keyword">EXISTS</span>')
@@ -119,7 +120,6 @@ function displayQueryInfo(sql, count) {
         .replace(/MAX/gi, '<span class="sql-keyword">MAX</span>')
         .replace(/MIN/gi, '<span class="sql-keyword">MIN</span>')
         .replace(/COUNT/gi, '<span class="sql-keyword">COUNT</span>')
-        .replace(/GROUP BY/gi, '<span class="sql-keyword">GROUP BY</span>')
         .replace(/HAVING/gi, '<span class="sql-keyword">HAVING</span>');
     
     queryInfo.innerHTML = `

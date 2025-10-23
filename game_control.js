@@ -90,7 +90,7 @@ function updateRoundAvailability(unlockedRounds, currentRound) {
             if (!lockedBadge) {
                 lockedBadge = document.createElement('span');
                 lockedBadge.className = 'locked-badge';
-                lockedBadge.textContent = '🔒 LOCKED';
+                lockedBadge.textContent = 'LOCKED';
                 lockedBadge.style.cssText = 'background: #555; color: #999; padding: 5px 10px; border-radius: 5px; font-size: 12px; margin-left: 10px;';
                 roundHeader.appendChild(lockedBadge);
             }
@@ -145,7 +145,7 @@ async function eliminatePlayers(roundName, inputId) {
         if (data.success) {
             // Show success message with details
             const message = `
-✅ ${roundName} Complete!
+${roundName} Complete!
 
 Eliminated: ${data.eliminatedCount} players
 Remaining: ${data.aliveCountAfter} players

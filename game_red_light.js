@@ -162,21 +162,7 @@ function endGame() {
 
 // Execute real elimination automatically
 async function executeElimination() {
-    console.log('Auto-executing elimination for Red Light Green Light...');
-    
     try {
-        // Check if round is already completed
-        const roundCheckResponse = await fetch('api/check_round_status.php?roundNumber=1');
-        const roundCheckData = await roundCheckResponse.json();
-        
-        if (roundCheckData.success && roundCheckData.isComplete) {
-            console.log('Round 1 already completed, skipping elimination');
-            const statusResponse = await fetch('api/game_status.php');
-            const statusData = await statusResponse.json();
-            showResult('Round Already Complete', statusData.aliveCount, 0);
-            return;
-        }
-        
         const statusResponse = await fetch('api/game_status.php');
         const statusData = await statusResponse.json();
         
@@ -188,8 +174,6 @@ async function executeElimination() {
         const aliveCount = statusData.aliveCount;
         const targetPlayers = 206;
         const eliminateCount = Math.max(0, aliveCount - targetPlayers);
-        
-        console.log(`Alive: ${aliveCount}, Target: ${targetPlayers}, To Eliminate: ${eliminateCount}`);
         
         if (eliminateCount === 0) {
             showResult('Already at target!', aliveCount, 0);
@@ -206,23 +190,13 @@ async function executeElimination() {
         });
         
         const data = await response.json();
-        console.log('Elimination complete:', data);
         
         if (data.success) {
-            // Mark round as complete
-            const markCompleteData = new FormData();
-            markCompleteData.append('roundNumber', 1);
-            await fetch('api/mark_round_complete.php', {
-                method: 'POST',
-                body: markCompleteData
-            });
-            
             showResult('Success', data.remainingCount, data.eliminatedCount);
         } else {
             showResult('Error: ' + data.error, 0, 0);
         }
     } catch (error) {
-        console.error('Error:', error);
         showResult('Server error', 0, 0);
     }
 }

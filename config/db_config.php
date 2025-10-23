@@ -15,6 +15,7 @@ function getDBConnection() {
         }
         
         $conn->set_charset("utf8mb4");
+        $conn->autocommit(TRUE); // Enable autocommit for InnoDB
         return $conn;
         
     } catch (Exception $e) {

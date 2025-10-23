@@ -102,42 +102,14 @@ function endGame() {
 
 // Auto-execute winner declaration
 async function executeWinnerDeclaration() {
-    console.log('Declaring final winner...');
-    
     try {
-        // Check if round is already completed
-        const roundCheckResponse = await fetch('api/check_round_status.php?roundNumber=6');
-        const roundCheckData = await roundCheckResponse.json();
-        
-        if (roundCheckData.success && roundCheckData.isComplete) {
-            console.log('Round 6 already completed, winner already declared');
-            const statusResponse = await fetch('api/game_status.php');
-            const statusData = await statusResponse.json();
-            if (statusData.winner) {
-                showResult(statusData.winner);
-            } else {
-                showResult(null);
-            }
-            return;
-        }
-        
         const response = await fetch('api/set_winner.php', {
             method: 'POST'
         });
         
         const data = await response.json();
-        console.log('Winner API Response:', data);
         
         if (data.success) {
-            // Mark round as complete
-            const markCompleteData = new FormData();
-            markCompleteData.append('roundNumber', 6);
-            await fetch('api/mark_round_complete.php', {
-                method: 'POST',
-                body: markCompleteData
-            });
-            
-            // Show result screen with winner info
             showResult(data.winner);
         } else {
             alert('Error declaring winner!');

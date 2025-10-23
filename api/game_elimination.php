@@ -58,16 +58,29 @@ try {
             throw new Exception("Invalid game: $game");
         }
         
-        $result = eliminatePlayers($conn, $game, $ELIMINATION_RULES[$game]);
+        // For tug_of_war, support passing winningTeam via GET to eliminate losing team
+        $winningTeam = isset($_GET['winningTeam']) ? $_GET['winningTeam'] : null;
+
+        $result = eliminatePlayers($conn, $game, $ELIMINATION_RULES[$game], $winningTeam);
         echo json_encode($result);
     }
     elseif ($action === 'reset') {
         // Reset all players to alive
         $conn->query("UPDATE players SET status = 'alive'");
+        // Also clear completed rounds
+        $conn->query("DELETE FROM completed_rounds");
         echo json_encode([
             'success' => true,
-            'message' => 'All players reset to alive status',
+            'message' => 'All players reset to alive status and completed rounds cleared',
             'alive_count' => $conn->affected_rows
+        ]);
+    }
+    elseif ($action === 'reset_rounds') {
+        // Clear completed rounds tracking only
+        $conn->query("DELETE FROM completed_rounds");
+        echo json_encode([
+            'success' => true,
+            'message' => 'Completed rounds cleared'
         ]);
     }
     else {
@@ -130,7 +143,7 @@ function getGameStatus($conn) {
     ];
 }
 
-function eliminatePlayers($conn, $game, $rules) {
+function eliminatePlayers($conn, $game, $rules, $winningTeam = null) {
     // Get current alive players
     $result = $conn->query("SELECT COUNT(*) as count FROM players WHERE status = 'alive'");
     $row = $result->fetch_assoc();
@@ -166,20 +179,75 @@ function eliminatePlayers($conn, $game, $rules) {
         throw new Exception("Cannot eliminate players. Check game rules.");
     }
     
-    // Randomly select players to eliminate
-    $sql = "UPDATE players 
-            SET status = 'eliminated' 
-            WHERE player_id IN (
-                SELECT player_id FROM (
-                    SELECT player_id FROM players 
-                    WHERE status = 'alive' 
-                    ORDER BY RAND() 
-                    LIMIT $to_eliminate
-                ) as temp
-            )";
-    
-    $conn->query($sql);
-    $eliminated = $conn->affected_rows;
+    // Special handling for tug_of_war: eliminate entire losing team
+    if ($game === 'tug_of_war') {
+        // Ensure teams exist in DB; if not, create two teams and assign alive players randomly
+        // Teams table: teams(team_id, team_name, team_leader_id, game_id, created_date, status)
+        // team_members: team_member_id, team_id, player_id
+
+        // Check if teams exist for game_id 3 (Tug of War)
+        $teamCheck = $conn->query("SELECT team_id, team_name FROM teams WHERE game_id = 3");
+        $teams = [];
+        while ($r = $teamCheck->fetch_assoc()) { $teams[] = $r; }
+
+        if (count($teams) < 2) {
+            // Create two teams
+            $conn->query("INSERT INTO teams (team_name, game_id) VALUES ('Team A', 3), ('Team B', 3)");
+            // Re-fetch teams
+            $teamCheck = $conn->query("SELECT team_id, team_name FROM teams WHERE game_id = 3 ORDER BY team_id ASC");
+            $teams = [];
+            while ($r = $teamCheck->fetch_assoc()) { $teams[] = $r; }
+
+            // Assign alive players randomly into two teams
+            $aliveRes = $conn->query("SELECT player_id FROM players WHERE status = 'alive' ORDER BY RAND()");
+            $i = 0;
+            while ($p = $aliveRes->fetch_assoc()) {
+                $teamId = $teams[$i % 2]['team_id'];
+                $pid = (int)$p['player_id'];
+                $conn->query("INSERT IGNORE INTO team_members (team_id, player_id) VALUES ($teamId, $pid)");
+                $i++;
+            }
+        }
+
+        // Determine losing team based on $winningTeam param
+        if ($winningTeam === 'A') {
+            $losingTeamName = 'Team B';
+        } elseif ($winningTeam === 'B') {
+            $losingTeamName = 'Team A';
+        } else {
+            // If not provided, pick a random losing team
+            $losingTeamName = (rand(0,1) === 0) ? 'Team A' : 'Team B';
+        }
+
+        // Get team id for losing team
+        $ltRes = $conn->query("SELECT team_id FROM teams WHERE game_id = 3 AND team_name = '" . $conn->real_escape_string($losingTeamName) . "' LIMIT 1");
+        $ltRow = $ltRes->fetch_assoc();
+        $losingTeamId = $ltRow ? (int)$ltRow['team_id'] : 0;
+
+        if ($losingTeamId > 0) {
+            // Eliminate all team members of losing team
+            $sql = "UPDATE players p JOIN team_members tm ON p.player_id = tm.player_id SET p.status = 'eliminated' WHERE tm.team_id = " . $losingTeamId;
+            $conn->query($sql);
+            $eliminated = $conn->affected_rows;
+        } else {
+            throw new Exception('Losing team not found');
+        }
+    } else {
+        // Randomly select players to eliminate
+        $sql = "UPDATE players 
+                SET status = 'eliminated' 
+                WHERE player_id IN (
+                    SELECT player_id FROM (
+                        SELECT player_id FROM players 
+                        WHERE status = 'alive' 
+                        ORDER BY RAND() 
+                        LIMIT $to_eliminate
+                    ) as temp
+                )";
+
+        $conn->query($sql);
+        $eliminated = $conn->affected_rows;
+    }
     
     // Check if there's a winner
     $result = $conn->query("SELECT COUNT(*) as count FROM players WHERE status = 'alive'");

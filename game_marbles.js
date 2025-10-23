@@ -129,22 +129,7 @@ function endGame() {
 
 // Auto-execute elimination logic
 async function executeElimination() {
-    console.log('Executing Marbles elimination...');
-    
     try {
-        // Check if round is already completed
-        const roundCheckResponse = await fetch('api/check_round_status.php?roundNumber=4');
-        const roundCheckData = await roundCheckResponse.json();
-        
-        if (roundCheckData.success && roundCheckData.isComplete) {
-            console.log('Round 4 already completed, skipping elimination');
-            const statusResponse = await fetch('api/game_status.php');
-            const statusData = await statusResponse.json();
-            showResult(statusData, statusData.aliveCount, 0);
-            return;
-        }
-        
-        // Get current game status
         const statusResponse = await fetch('api/game_status.php');
         const statusData = await statusResponse.json();
         
@@ -155,18 +140,20 @@ async function executeElimination() {
         }
         
         const aliveCount = statusData.aliveCount;
-        const targetPlayers = 28; // Round 4 target
-        const eliminateCount = Math.max(0, aliveCount - targetPlayers);
+        const targetPlayers = 28;
+        let eliminateCount = aliveCount - targetPlayers;
         
-        console.log(`Current alive: ${aliveCount}, Target: ${targetPlayers}, To eliminate: ${eliminateCount}`);
+        if (eliminateCount < 0) {
+            alert('Not enough players to reach target of 28!');
+            showResult(statusData, aliveCount, 0);
+            return;
+        }
         
-        // If already at target, just show results
         if (eliminateCount === 0) {
             showResult(statusData, aliveCount, 0);
             return;
         }
         
-        // Execute elimination
         const formData = new FormData();
         formData.append('gameRound', 'Marbles');
         formData.append('eliminateCount', eliminateCount);
@@ -179,17 +166,6 @@ async function executeElimination() {
         const data = await response.json();
         
         if (data.success) {
-            console.log(`Eliminated ${data.eliminatedCount}, ${data.remainingCount} survivors`);
-            
-            // Mark round as complete
-            const markCompleteData = new FormData();
-            markCompleteData.append('roundNumber', 4);
-            await fetch('api/mark_round_complete.php', {
-                method: 'POST',
-                body: markCompleteData
-            });
-            
-            // Show result screen with actual database numbers
             showResult(statusData, data.remainingCount, data.eliminatedCount);
         } else {
             alert('Error eliminating players!');

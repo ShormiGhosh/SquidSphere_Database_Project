@@ -83,7 +83,29 @@ function endGame() {
     }
     
     // Show result after animations
-    setTimeout(showResult, 2000);
+    setTimeout(async () => {
+        // Call server-side elimination for tug_of_war
+        try {
+            // send which team won so server can eliminate the losing team
+            const params = new URLSearchParams();
+            params.append('action', 'eliminate');
+            params.append('game', 'tug_of_war');
+            params.append('winningTeam', winningTeam === 'Team A' ? 'A' : 'B');
+
+            const resp = await fetch('api/game_elimination.php?' + params.toString());
+            const data = await resp.json();
+
+            if (data.success) {
+                showResultDB(data.eliminated, data.remaining);
+            } else {
+                console.error('Elimination API error:', data.error);
+                showResult();
+            }
+        } catch (e) {
+            console.error('Elimination request failed:', e);
+            showResult();
+        }
+    }, 2000);
 }
 
 function showResult() {
@@ -98,5 +120,21 @@ function showResult() {
     survivorsSpan.textContent = '10 players';
     eliminatedSpan.textContent = '10 players';
     
+    resultScreen.classList.add('active');
+}
+
+// Show result using DB-updated values from API
+function showResultDB(eliminatedCount, remainingCount) {
+    const resultScreen = document.getElementById('resultScreen');
+    const resultTitle = document.getElementById('resultTitle');
+    const winningTeamSpan = document.getElementById('winningTeam');
+    const survivorsSpan = document.getElementById('survivors');
+    const eliminatedSpan = document.getElementById('eliminated');
+
+    resultTitle.textContent = winningTeam + ' Wins!';
+    winningTeamSpan.textContent = winningTeam;
+    survivorsSpan.textContent = `${remainingCount} players`;
+    eliminatedSpan.textContent = `${eliminatedCount} players`;
+
     resultScreen.classList.add('active');
 }

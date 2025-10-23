@@ -30,14 +30,14 @@ function updateStatusDisplay(data) {
 
     // Update current round status
     const roundText = {
-        'not_started': '🎮 Ready to Start - All 456 Players Ready',
-        'ready_for_round_1': '🎮 Ready for Round 1: Red Light Green Light',
-        'round_1_completed': '✅ Round 1 Complete - Ready for Round 2: Honeycomb',
-        'round_2_completed': '✅ Round 2 Complete - Ready for Round 3: Tug of War',
-        'round_3_completed': '✅ Round 3 Complete - Ready for Round 4: Marbles',
-        'round_4_completed': '✅ Round 4 Complete - Ready for Round 5: Glass Bridge',
-        'round_5_completed': '✅ Round 5 Complete - Ready for Final: Squid Game',
-        'game_over_winner': '🏆 GAME OVER - WE HAVE A WINNER!'
+        'not_started': 'Ready to Start - All 456 Players Ready',
+        'ready_for_round_1': 'Ready for Round 1: Red Light Green Light',
+        'round_1_completed': 'Round 1 Complete - Ready for Round 2: Honeycomb',
+        'round_2_completed': 'Round 2 Complete - Ready for Round 3: Tug of War',
+        'round_3_completed': 'Round 3 Complete - Ready for Round 4: Marbles',
+        'round_4_completed': 'Round 4 Complete - Ready for Round 5: Glass Bridge',
+        'round_5_completed': 'Round 5 Complete - Ready for Final: Squid Game',
+        'game_over_winner': 'GAME OVER - WE HAVE A WINNER!'
     };
 
     document.getElementById('currentRound').textContent = 
@@ -58,42 +58,42 @@ function updateRoundStatuses(alive, eliminated) {
     if (eliminated === 0) {
         setRoundStatus('round1Status', 'Not Started', 'pending');
     } else if (alive < 456 && alive > 250) {
-        setRoundStatus('round1Status', '✅ Completed', 'completed');
+        setRoundStatus('round1Status', 'Completed', 'completed');
     } else if (alive <= 250) {
-        setRoundStatus('round1Status', '✅ Completed', 'completed');
+        setRoundStatus('round1Status', 'Completed', 'completed');
     }
 
     // Round 2: Honeycomb
     if (alive < 250 && alive > 120) {
-        setRoundStatus('round2Status', '✅ Completed', 'completed');
+        setRoundStatus('round2Status', 'Completed', 'completed');
     } else if (alive > 250) {
         setRoundStatus('round2Status', 'Not Started', 'pending');
     }
 
     // Round 3: Tug of War
     if (alive < 120 && alive > 40) {
-        setRoundStatus('round3Status', '✅ Completed', 'completed');
+        setRoundStatus('round3Status', 'Completed', 'completed');
     } else if (alive >= 120) {
         setRoundStatus('round3Status', 'Not Started', 'pending');
     }
 
     // Round 4: Marbles
     if (alive < 40 && alive > 10) {
-        setRoundStatus('round4Status', '✅ Completed', 'completed');
+        setRoundStatus('round4Status', 'Completed', 'completed');
     } else if (alive >= 40) {
         setRoundStatus('round4Status', 'Not Started', 'pending');
     }
 
     // Round 5: Glass Bridge
     if (alive <= 10 && alive > 1) {
-        setRoundStatus('round5Status', '✅ Completed', 'completed');
+        setRoundStatus('round5Status', 'Completed', 'completed');
     } else if (alive > 10) {
         setRoundStatus('round5Status', 'Not Started', 'pending');
     }
 
     // Round 6: Squid Game
     if (alive === 1) {
-        setRoundStatus('round6Status', '🏆 WINNER DETERMINED', 'winner');
+        setRoundStatus('round6Status', 'WINNER DETERMINED', 'winner');
     } else if (alive === 2) {
         setRoundStatus('round6Status', 'Ready for Final', 'ready');
     } else {
@@ -120,8 +120,8 @@ async function eliminateGame(game) {
     };
 
     const confirmMessage = game === 'squid_game' 
-        ? '🏆 This will determine the WINNER! Only 1 player will remain. Continue?'
-        : `⚠️ This will eliminate players in ${gameNames[game]}. Continue?`;
+        ? 'This will determine the WINNER! Only 1 player will remain. Continue?'
+        : `This will eliminate players in ${gameNames[game]}. Continue?`;
 
     if (!confirm(confirmMessage)) {
         return;
@@ -137,7 +137,7 @@ async function eliminateGame(game) {
                 showWinnerAnnouncement(data);
             } else {
                 // Show elimination result
-                alert(`✅ ${data.message}\n\n` +
+                alert(`${data.message}\n\n` +
                       `Game: ${data.game}\n` +
                       `Eliminated: ${data.eliminated} players\n` +
                       `Remaining: ${data.remaining} players`);
@@ -157,7 +157,7 @@ async function eliminateGame(game) {
 // Show winner announcement
 function showWinnerAnnouncement(data) {
     const message = `
-        🏆 WINNER ANNOUNCEMENT! 🏆
+        WINNER ANNOUNCEMENT!
         
         Player #${data.winner.player_number}
         ${data.winner.name}
@@ -165,7 +165,7 @@ function showWinnerAnnouncement(data) {
         Prize Money: ₩${data.prize_money.toLocaleString()}
         (${data.eliminated} eliminated players × ₩100,000,000)
         
-        🎉 CONGRATULATIONS! 🎉
+        CONGRATULATIONS!
     `;
     
     alert(message);
@@ -202,7 +202,7 @@ async function resetGame() {
         const data = await response.json();
 
         if (data.success) {
-            alert('✅ Game Reset!\n\nAll 456 players are now alive.');
+            alert('Game Reset!\n\nAll 456 players are now alive.');
             document.getElementById('winnerPanel').style.display = 'none';
             loadGameStatus();
         } else {
