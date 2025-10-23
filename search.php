@@ -114,6 +114,12 @@
                                 <option value="not_in_rare_nationalities">NOT IN: Rare Nationalities (<5 Players)</option>
                                 <option value="exists_similar_debt">EXISTS: Players with Similar Debt (±5M)</option>
                             </optgroup>
+                            <optgroup label="JOIN Operations">
+                                <option value="equi_join">EQUI JOIN: Players with Game Participation</option>
+                                <option value="right_join">RIGHT JOIN: All Games (even without players)</option>
+                                <option value="cross_join">CROSS JOIN: All Player-Game Combinations (Limited)</option>
+                                <option value="non_equi_join">NON-EQUI JOIN: Players with Similar Debt (±10M)</option>
+                            </optgroup>
                         </select>
                     </div>
                 </div>

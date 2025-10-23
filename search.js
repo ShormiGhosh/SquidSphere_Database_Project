@@ -81,17 +81,46 @@ function createPlayerTile(player) {
     // Convert gender code to full text
     const genderText = player.gender === 'M' ? 'Male' : (player.gender === 'F' ? 'Female' : player.gender);
     
-    tile.innerHTML = `
-        <div class="player-number">${player.player_number}</div>
+    // Check if this is a JOIN result with game information
+    const hasGameInfo = player.game_name || player.round_number;
+    const hasSimilarCount = player.similar_debt_players !== undefined;
+    
+    let playerInfoHTML = `
+        <div class="player-number">${player.player_number || 'N/A'}</div>
         <div class="player-info">
-            <div class="player-name">${player.name}</div>
-            <div class="player-detail">Age: ${player.age}</div>
-            <div class="player-detail">Gender: ${genderText}</div>
-            <div class="player-detail">Nationality: ${player.nationality}</div>
-            <div class="player-detail">Debt: ₩${Number(player.debt_amount).toLocaleString()}</div>
-            <div class="player-status status-${player.status}">${player.status.toUpperCase()}</div>
-        </div>
+            <div class="player-name">${player.name || 'No Player Data'}</div>
     `;
+    
+    // Add player details if available
+    if (player.age) {
+        playerInfoHTML += `<div class="player-detail">Age: ${player.age}</div>`;
+    }
+    if (player.gender) {
+        playerInfoHTML += `<div class="player-detail">Gender: ${genderText}</div>`;
+    }
+    if (player.nationality) {
+        playerInfoHTML += `<div class="player-detail">Nationality: ${player.nationality}</div>`;
+    }
+    if (player.debt_amount) {
+        playerInfoHTML += `<div class="player-detail">Debt: ₩${Number(player.debt_amount).toLocaleString()}</div>`;
+    }
+    
+    // Add JOIN-specific information
+    if (hasGameInfo) {
+        playerInfoHTML += `<div class="player-detail" style="color: #ffd700; font-weight: bold;">Game: ${player.game_name || 'N/A'} (Round ${player.round_number || 'N/A'})</div>`;
+    }
+    
+    if (hasSimilarCount) {
+        playerInfoHTML += `<div class="player-detail" style="color: #4CAF50; font-weight: bold;">Similar Debt Players: ${player.similar_debt_players}</div>`;
+    }
+    
+    // Add status if available
+    if (player.status) {
+        playerInfoHTML += `<div class="player-status status-${player.status}">${player.status.toUpperCase()}</div>`;
+    }
+    
+    playerInfoHTML += `</div>`;
+    tile.innerHTML = playerInfoHTML;
     
     return tile;
 }
@@ -104,6 +133,10 @@ function displayQueryInfo(sql, count) {
     const formattedSQL = sql
         .replace(/ORDER BY/gi, '<span class="sql-keyword">ORDER BY</span>')
         .replace(/GROUP BY/gi, '<span class="sql-keyword">GROUP BY</span>')
+        .replace(/INNER JOIN/gi, '<span class="sql-keyword">INNER JOIN</span>')
+        .replace(/LEFT JOIN/gi, '<span class="sql-keyword">LEFT JOIN</span>')
+        .replace(/RIGHT JOIN/gi, '<span class="sql-keyword">RIGHT JOIN</span>')
+        .replace(/CROSS JOIN/gi, '<span class="sql-keyword">CROSS JOIN</span>')
         .replace(/NOT IN/gi, '<span class="sql-keyword">NOT IN</span>')
         .replace(/SELECT/gi, '<span class="sql-keyword">SELECT</span>')
         .replace(/FROM/gi, '<span class="sql-keyword">FROM</span>')
@@ -116,11 +149,14 @@ function displayQueryInfo(sql, count) {
         .replace(/UNION/gi, '<span class="sql-keyword">UNION</span>')
         .replace(/EXISTS/gi, '<span class="sql-keyword">EXISTS</span>')
         .replace(/DISTINCT/gi, '<span class="sql-keyword">DISTINCT</span>')
+        .replace(/BETWEEN/gi, '<span class="sql-keyword">BETWEEN</span>')
         .replace(/AVG/gi, '<span class="sql-keyword">AVG</span>')
         .replace(/MAX/gi, '<span class="sql-keyword">MAX</span>')
         .replace(/MIN/gi, '<span class="sql-keyword">MIN</span>')
         .replace(/COUNT/gi, '<span class="sql-keyword">COUNT</span>')
-        .replace(/HAVING/gi, '<span class="sql-keyword">HAVING</span>');
+        .replace(/HAVING/gi, '<span class="sql-keyword">HAVING</span>')
+        .replace(/ON/gi, '<span class="sql-keyword">ON</span>')
+        .replace(/JOIN/gi, '<span class="sql-keyword">JOIN</span>');
     
     queryInfo.innerHTML = `
         <div class="query-box">

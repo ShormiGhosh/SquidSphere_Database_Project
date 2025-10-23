@@ -169,6 +169,49 @@ function buildAdvancedQuery($advancedQuery, $playerNumber, $playerName, $gender,
                 ) " . buildWhereConditions($playerNumber, $playerName, $gender, $minAge, $maxAge, 
                                            $nationality, $minDebt, $maxDebt, $status) . 
                 " ORDER BY $sortBy LIMIT $limit";
+            
+            // EQUI JOIN: Players with Game Participation (equality condition)
+            case 'equi_join':
+                $baseWhere = buildWhereConditions($playerNumber, $playerName, $gender, $minAge, $maxAge, 
+                                                  $nationality, $minDebt, $maxDebt, $status);
+                return "SELECT DISTINCT p.* FROM players p 
+                        INNER JOIN game_participation gp ON p.player_id = gp.player_id 
+                        INNER JOIN games g ON gp.game_id = g.game_id" . 
+                        $baseWhere . " ORDER BY $sortBy LIMIT $limit";
+            
+            // RIGHT JOIN: All Games (even without players)
+            case 'right_join':
+                // This shows games perspective, but returns player data where available
+                return "SELECT DISTINCT p.player_number, p.name, p.age, p.gender, p.nationality, 
+                        p.debt_amount, p.status, g.game_name, g.round_number 
+                        FROM game_participation gp 
+                        RIGHT JOIN games g ON gp.game_id = g.game_id 
+                        LEFT JOIN players p ON gp.player_id = p.player_id 
+                        ORDER BY g.round_number, p.player_number LIMIT $limit";
+            
+            // CROSS JOIN: All possible player-game combinations (LIMITED for performance)
+            case 'cross_join':
+                return "SELECT p.player_number, p.name, p.age, p.gender, p.nationality, 
+                        p.debt_amount, p.status, g.game_name, g.round_number 
+                        FROM players p 
+                        CROSS JOIN games g 
+                        WHERE p.player_number <= '010' 
+                        ORDER BY p.player_number, g.round_number 
+                        LIMIT $limit";
+            
+            // NON-EQUI JOIN: Players with Similar Debt (using range/inequality)
+            case 'non_equi_join':
+                return "SELECT DISTINCT p1.player_number, p1.name, p1.age, p1.gender, p1.nationality, 
+                        p1.debt_amount, p1.status, 
+                        COUNT(DISTINCT p2.player_id) as similar_debt_players 
+                        FROM players p1 
+                        JOIN players p2 ON p1.player_id != p2.player_id 
+                            AND p2.debt_amount BETWEEN p1.debt_amount - 10000000 AND p1.debt_amount + 10000000 
+                        GROUP BY p1.player_id, p1.player_number, p1.name, p1.age, p1.gender, 
+                                 p1.nationality, p1.debt_amount, p1.status 
+                        HAVING similar_debt_players > 0 
+                        ORDER BY similar_debt_players DESC, $sortBy 
+                        LIMIT $limit";
         }
     }
     
