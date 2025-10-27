@@ -67,12 +67,21 @@ try {
     elseif ($action === 'reset') {
         // Reset all players to alive
         $conn->query("UPDATE players SET status = 'alive'");
-        // Also clear completed rounds
+        // Clear completed rounds
         $conn->query("DELETE FROM completed_rounds");
+        // Clear game participation records
+        $conn->query("DELETE FROM game_participation");
+        // Clear prize distribution records
+        $conn->query("DELETE FROM prize_distribution");
+        // Clear team members
+        $conn->query("DELETE FROM team_members");
+        // Clear teams
+        $conn->query("DELETE FROM teams");
+        
         echo json_encode([
             'success' => true,
-            'message' => 'All players reset to alive status and completed rounds cleared',
-            'alive_count' => $conn->affected_rows
+            'message' => 'All players reset to alive status, all game data cleared (rounds, participation, prizes, teams)',
+            'alive_count' => 456
         ]);
     }
     elseif ($action === 'reset_rounds') {
@@ -249,6 +258,79 @@ function eliminatePlayers($conn, $game, $rules, $winningTeam = null) {
         $eliminated = $conn->affected_rows;
     }
     
+    // Get game_id for current game
+    $gameIdMap = [
+        'red_light' => 1,
+        'honeycomb' => 2,
+        'tug_of_war' => 3,
+        'marbles' => 4,
+        'glass_bridge' => 5,
+        'squid_game' => 6
+    ];
+    $gameId = $gameIdMap[$game] ?? 1;
+    
+    // Record game participation for ALL alive and just-eliminated players
+    $allPlayersResult = $conn->query("SELECT player_id FROM players WHERE status IN ('alive', 'eliminated', 'winner')");
+    while ($playerRow = $allPlayersResult->fetch_assoc()) {
+        $playerId = $playerRow['player_id'];
+        
+        // Get player's current status
+        $statusQuery = $conn->query("SELECT status FROM players WHERE player_id = $playerId");
+        $statusRow = $statusQuery->fetch_assoc();
+        $playerStatus = $statusRow['status'];
+        
+        // Determine result
+        $result = ($playerStatus == 'eliminated') ? 'eliminated' : 'survived';
+        
+        // Get team_id if applicable (for tug_of_war)
+        $teamId = null;
+        if ($game === 'tug_of_war') {
+            $teamQuery = $conn->query("SELECT team_id FROM team_members WHERE player_id = $playerId LIMIT 1");
+            if ($teamRow = $teamQuery->fetch_assoc()) {
+                $teamId = $teamRow['team_id'];
+            }
+        }
+        
+        // Random score between 0-100
+        $score = rand(0, 100);
+        
+        // Check if participation record exists
+        $checkParticipation = $conn->query("SELECT participation_id FROM game_participation WHERE player_id = $playerId AND game_id = $gameId");
+        
+        if ($checkParticipation->num_rows == 0) {
+            // Insert new participation record
+            if ($teamId) {
+                $conn->query("INSERT INTO game_participation (player_id, game_id, team_id, result, score) 
+                             VALUES ($playerId, $gameId, $teamId, '$result', $score)");
+            } else {
+                $conn->query("INSERT INTO game_participation (player_id, game_id, result, score) 
+                             VALUES ($playerId, $gameId, '$result', $score)");
+            }
+        } else {
+            // Update existing record
+            $conn->query("UPDATE game_participation SET result = '$result', score = $score WHERE player_id = $playerId AND game_id = $gameId");
+        }
+    }
+    
+    // Record prize distribution for eliminated players
+    $eliminatedPlayers = $conn->query("SELECT player_id FROM players WHERE status = 'eliminated'");
+    $totalEliminated = $eliminatedPlayers->num_rows;
+    $prizePerPlayer = 100000000; // 100 million won per eliminated player
+    $totalPrize = $totalEliminated * $prizePerPlayer;
+    
+    while ($elimRow = $eliminatedPlayers->fetch_assoc()) {
+        $playerId = $elimRow['player_id'];
+        
+        // Check if prize already distributed for this game
+        $checkPrize = $conn->query("SELECT distribution_id FROM prize_distribution WHERE player_id = $playerId AND game_id = $gameId");
+        
+        if ($checkPrize->num_rows == 0) {
+            // Insert prize distribution record (pending for eliminated players)
+            $conn->query("INSERT INTO prize_distribution (player_id, game_id, amount, payment_status, description) 
+                         VALUES ($playerId, $gameId, $prizePerPlayer, 'pending', 'Elimination reward - {$rules['name']}')");
+        }
+    }
+    
     // Check if there's a winner
     $result = $conn->query("SELECT COUNT(*) as count FROM players WHERE status = 'alive'");
     $row = $result->fetch_assoc();
@@ -259,11 +341,22 @@ function eliminatePlayers($conn, $game, $rules, $winningTeam = null) {
         $conn->query("UPDATE players SET status = 'winner' WHERE status = 'alive'");
         
         // Get winner details
-        $winner_result = $conn->query("SELECT player_number, name FROM players WHERE status = 'winner' LIMIT 1");
+        $winner_result = $conn->query("SELECT player_id, player_number, name FROM players WHERE status = 'winner' LIMIT 1");
         $winner = $winner_result->fetch_assoc();
         
         $total_eliminated = 455; // All except winner
         $prize_money = $total_eliminated * 100000000; // 100M per eliminated player
+        
+        // Record winner's participation as 'winner'
+        $winnerId = $winner['player_id'];
+        $conn->query("UPDATE game_participation SET result = 'winner' WHERE player_id = $winnerId AND game_id = $gameId");
+        
+        // Award full prize to winner
+        $checkWinnerPrize = $conn->query("SELECT distribution_id FROM prize_distribution WHERE player_id = $winnerId AND description LIKE '%Grand Prize%'");
+        if ($checkWinnerPrize->num_rows == 0) {
+            $conn->query("INSERT INTO prize_distribution (player_id, game_id, amount, payment_status, description) 
+                         VALUES ($winnerId, $gameId, $prize_money, 'paid', 'Grand Prize - Squid Game Winner')");
+        }
         
         return [
             'success' => true,

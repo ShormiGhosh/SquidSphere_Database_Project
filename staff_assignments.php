@@ -38,24 +38,6 @@ $game_stats_query = "
 ";
 $game_stats = $conn->query($game_stats_query);
 
-// Top working staff (ORDER BY + LIMIT)
-$top_staff_query = "
-    SELECT 
-        s.staff_number,
-        s.name,
-        s.role,
-        COUNT(sa.assignment_id) AS total_assignments,
-        SUM(sa.hours_worked) AS total_hours,
-        AVG(sa.hours_worked) AS avg_hours
-    FROM staff s
-    INNER JOIN staff_assignments sa ON s.staff_id = sa.staff_id
-    GROUP BY s.staff_id, s.staff_number, s.name, s.role
-    HAVING COUNT(sa.assignment_id) >= 1
-    ORDER BY total_hours DESC
-    LIMIT 10
-";
-$top_staff = $conn->query($top_staff_query);
-
 // Assignments by role (GROUP BY)
 $role_assignments_query = "
     SELECT 
@@ -174,41 +156,6 @@ closeDBConnection($conn);
             </div>
         </div>
 
-        <!-- Top Working Staff -->
-        <div class="section-container">
-            <h2 class="section-title">Top 10 Working Staff (ORDER BY + LIMIT)</h2>
-            <div class="top-staff-grid">
-                <?php 
-                $rank = 1;
-                while($staff = $top_staff->fetch_assoc()): 
-                ?>
-                    <div class="top-staff-card rank-<?php echo $rank; ?>">
-                        <div class="rank-badge">#<?php echo $rank; ?></div>
-                        <div class="staff-info">
-                            <div class="staff-name"><?php echo htmlspecialchars($staff['name']); ?></div>
-                            <div class="staff-number"><?php echo $staff['staff_number']; ?></div>
-                            <span class="role-badge role-<?php echo strtolower($staff['role']); ?>">
-                                <?php echo $staff['role']; ?>
-                            </span>
-                        </div>
-                        <div class="staff-metrics">
-                            <div class="metric">
-                                <span class="metric-value"><?php echo $staff['total_assignments']; ?></span>
-                                <span class="metric-label">Assignments</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-value"><?php echo number_format($staff['total_hours'], 1); ?>h</span>
-                                <span class="metric-label">Total Hours</span>
-                            </div>
-                        </div>
-                    </div>
-                <?php 
-                    $rank++;
-                endwhile; 
-                ?>
-            </div>
-        </div>
-
         <!-- Assignments by Role -->
         <div class="section-container">
             <h2 class="section-title">Assignments by Role (GROUP BY)</h2>
@@ -309,15 +256,6 @@ INNER JOIN games g ON sa.game_id = g.game_id<br>
 GROUP BY g.game_id</code>
                 </div>
                 <div class="sql-card">
-                    <div class="sql-title">ORDER BY + LIMIT - Top Workers</div>
-                    <code>SELECT s.name, SUM(sa.hours_worked) as total<br>
-FROM staff s<br>
-INNER JOIN staff_assignments sa ON s.staff_id = sa.staff_id<br>
-GROUP BY s.staff_id<br>
-ORDER BY total DESC<br>
-LIMIT 10</code>
-                </div>
-                <div class="sql-card">
                     <div class="sql-title">Aggregates - Work Statistics</div>
                     <code>SELECT role, COUNT(*) as assignments,<br>
 SUM(hours_worked), AVG(hours_worked)<br>
@@ -330,8 +268,7 @@ GROUP BY role</code>
 
         <!-- Navigation Buttons -->
         <div class="nav-buttons">
-            <a href="staff.php" class="nav-btn secondary">← Back to Staff Hierarchy</a>
-            <a href="dashboard.php" class="nav-btn secondary">Dashboard</a>
+            <a href="dashboard.php" class="nav-btn secondary">← Dashboard</a>
         </div>
     </div>
 

@@ -1,22 +1,5 @@
 # SquidSphere Database Project - SQL Implementation Overview
 
-## 📊 Project Summary
-
-**Project Name:** SquidSphere - Squid Game Database Management System  
-**Database Type:** MySQL / MariaDB  
-**Total Tables:** 9  
-**Total Views:** 4  
-**Programming Languages:** PHP, JavaScript, SQL  
-**Framework:** Vanilla PHP with MySQL
-
----
-
-## 🗂️ Database Schema Overview
-
-### **Core Tables (4 Original)**
-
-#### 1. **PLAYERS Table**
-Primary table storing all player information.
 
 ```sql
 CREATE TABLE IF NOT EXISTS players (
@@ -33,22 +16,9 @@ CREATE TABLE IF NOT EXISTS players (
     last_active DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT chk_age CHECK (age >= 18),
     CONSTRAINT chk_debt CHECK (debt_amount > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 ```
 
-**Purpose:** Track all 456 players with their personal info and game status  
-**Key Fields:**
-- `player_id` - Primary key (auto-increment)
-- `player_number` - Unique 3-digit identifier (e.g., '001', '456')
-- `status` - Current state: alive, eliminated, winner
-- `debt_amount` - Financial debt (reason for joining)
-
-**Constraints:**
-- Age must be ≥ 18
-- Debt must be positive
-- Player number must be unique
-
-**Indexes:**
 ```sql
 CREATE INDEX idx_player_number ON players(player_number);
 CREATE INDEX idx_status ON players(status);
@@ -59,7 +29,6 @@ CREATE INDEX idx_alliance_group ON players(alliance_group);
 ---
 
 #### 2. **STAFF Table**
-Manages staff hierarchy with self-referencing foreign key.
 
 ```sql
 CREATE TABLE staff (
@@ -79,15 +48,8 @@ CREATE TABLE staff (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
-**Purpose:** Track staff members in a hierarchical structure (Self-Join)  
-**Key Fields:**
-- `staff_id` - Primary key
-- `supervisor_id` - Foreign key referencing same table (Self-Join)
-- `role` - Circle (worker), Triangle (soldier), Square (manager), Front Man (boss)
-
 **Self-Join Usage:**
 ```sql
--- View staff with their supervisors
 SELECT 
     s1.name AS staff_name, 
     s1.role AS staff_role,
@@ -106,7 +68,6 @@ CREATE INDEX idx_role ON staff(role);
 ---
 
 #### 3. **GAMES Table**
-Stores information about each game round.
 
 ```sql
 CREATE TABLE games (
@@ -119,8 +80,7 @@ CREATE TABLE games (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
-**Purpose:** Define the 6 game rounds  
-**Sample Data:**
+
 ```sql
 INSERT INTO games (game_id, game_name, game_type, max_players, description) VALUES
 (1, 'Red Light Green Light', 'Elimination', 456, 'Stop when doll turns'),
@@ -134,7 +94,6 @@ INSERT INTO games (game_id, game_name, game_type, max_players, description) VALU
 ---
 
 #### 4. **STAFF_ASSIGNMENTS Table**
-Many-to-many relationship between staff and games.
 
 ```sql
 CREATE TABLE staff_assignments (
@@ -168,8 +127,6 @@ CREATE INDEX idx_round ON staff_assignments(round_number);
 
 ---
 
-### **Extended Tables (4 New)**
-
 #### 5. **TEAMS Table**
 For team-based games (Tug of War).
 
@@ -193,11 +150,6 @@ CREATE TABLE IF NOT EXISTS teams (
         UNIQUE (team_name, game_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
-
-**Purpose:** Create and manage teams for group competitions  
-**Relationships:**
-- Links to `players` (team leader)
-- Links to `games` (which game)
 
 ---
 
@@ -223,8 +175,6 @@ CREATE TABLE IF NOT EXISTS team_members (
         UNIQUE(team_id, player_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
-
-**Purpose:** Track team membership (which players are on which teams)
 
 ---
 
@@ -260,15 +210,10 @@ CREATE TABLE IF NOT EXISTS game_participation (
 ```
 
 **Purpose:** Historical record of each player's performance per game  
-**Key Features:**
-- One record per player per game
-- Can link to team for team-based games
-- Stores result, score, and completion time
 
 ---
 
 #### 8. **PRIZE_DISTRIBUTION Table**
-Tracks prize money given to players.
 
 ```sql
 CREATE TABLE IF NOT EXISTS prize_distribution (
@@ -292,12 +237,6 @@ CREATE TABLE IF NOT EXISTS prize_distribution (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
-**Purpose:** Financial tracking for prize money  
-**Features:**
-- Payment status tracking
-- Optional game association
-- Amount validation (must be positive)
-
 ---
 
 #### 9. **COMPLETED_ROUNDS Table**
@@ -310,12 +249,9 @@ CREATE TABLE IF NOT EXISTS completed_rounds (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
-**Purpose:** Game state management  
-**Usage:** Auto-created by API when a round completes
-
 ---
 
-## 📋 Views (Lab 05 Requirement)
+##  Views 
 
 ### 1. **vw_staff_hierarchy**
 Shows staff with their supervisor names (Self-Join view).
@@ -419,69 +355,8 @@ GROUP BY g.game_id, g.game_name, g.game_type, g.max_players;
 
 ---
 
-## 🔑 SQL Commands Used in Project
+##  SQL Commands Used in Project
 
-### **DDL (Data Definition Language)**
-
-#### CREATE
-```sql
--- Create table
-CREATE TABLE IF NOT EXISTS table_name (...)
-
--- Create index
-CREATE INDEX idx_name ON table_name(column_name);
-
--- Create view
-CREATE OR REPLACE VIEW view_name AS SELECT ...
-```
-
-#### ALTER
-```sql
--- Add column
-ALTER TABLE players ADD COLUMN last_active DATETIME;
-
--- Modify column
-ALTER TABLE games ADD COLUMN description TEXT DEFAULT NULL;
-
--- Drop column (if needed)
-ALTER TABLE table_name DROP COLUMN column_name;
-```
-
-#### DROP
-```sql
--- Drop table
-DROP TABLE IF EXISTS table_name;
-
--- Drop index
-DROP INDEX idx_name ON table_name;
-
--- Drop view
-DROP VIEW IF EXISTS view_name;
-```
-
----
-
-### **DML (Data Manipulation Language)**
-
-#### INSERT
-```sql
--- Simple insert
-INSERT INTO players (player_number, name, age, gender, debt_amount, nationality)
-VALUES ('001', 'Seong Gi-hun', 47, 'M', 255000000, 'South Korea');
-
--- Insert multiple rows
-INSERT INTO games (game_name, game_type, max_players) VALUES
-('Red Light Green Light', 'Elimination', 456),
-('Honeycomb', 'Precision', 456);
-
--- Insert with duplicate key handling
-INSERT INTO games (game_id, game_name, game_type, max_players)
-VALUES (1, 'Red Light Green Light', 'Elimination', 456)
-ON DUPLICATE KEY UPDATE game_name=game_name;
-
--- Insert ignore (skip duplicates)
-INSERT IGNORE INTO completed_rounds (round_number) VALUES (1);
-```
 
 #### UPDATE
 ```sql
@@ -670,17 +545,72 @@ LEFT JOIN game_participation gp ON p.player_id = gp.player_id
 LEFT JOIN games g ON gp.game_id = g.game_id;
 ```
 
-#### RIGHT JOIN
+#### RIGHT JOIN (OUTER JOIN)
+**Implementation Location:** `api/search_players.php` - Advanced Query: `right_join`
+
 ```sql
--- All games and participating players
-SELECT 
-    g.game_name,
-    p.player_number,
-    p.name
-FROM players p
-RIGHT JOIN game_participation gp ON p.player_id = gp.player_id
-RIGHT JOIN games g ON gp.game_id = g.game_id;
+-- All games (even without players) - Shows all games regardless of participation
+SELECT DISTINCT 
+    p.player_number, 
+    p.name, 
+    p.age, 
+    p.gender, 
+    p.nationality, 
+    p.debt_amount, 
+    p.status, 
+    g.game_name, 
+    g.round_number 
+FROM game_participation gp 
+RIGHT JOIN games g ON gp.game_id = g.game_id 
+LEFT JOIN players p ON gp.player_id = p.player_id 
+ORDER BY g.round_number, p.player_number;
 ```
+
+**Purpose:** Demonstrates RIGHT OUTER JOIN by showing all games in the system, even if no players have participated. Uses LEFT JOIN to include player details where available.
+
+**Access:** Search Page → Special Filters → "RIGHT JOIN: All Games (even without players)"
+
+#### EQUI JOIN
+**Implementation Location:** `api/search_players.php` - Advanced Query: `equi_join`
+
+```sql
+-- Players with Game Participation (equality condition JOIN)
+SELECT DISTINCT p.* 
+FROM players p 
+INNER JOIN game_participation gp ON p.player_id = gp.player_id 
+INNER JOIN games g ON gp.game_id = g.game_id;
+```
+
+**Purpose:** Demonstrates EQUI JOIN using equality operators (=) in the JOIN condition. Shows only players who have participated in at least one game.
+
+**Access:** Search Page → Special Filters → "EQUI JOIN: Players with Game Participation"
+
+#### NON-EQUI JOIN
+**Implementation Location:** `api/search_players.php` - Advanced Query: `non_equi_join`
+
+```sql
+-- Players with Similar Debt (using range/inequality conditions)
+SELECT DISTINCT 
+    p1.player_number, 
+    p1.name, 
+    p1.age, 
+    p1.gender, 
+    p1.nationality, 
+    p1.debt_amount, 
+    p1.status, 
+    COUNT(DISTINCT p2.player_id) as similar_debt_players 
+FROM players p1 
+JOIN players p2 ON p1.player_id != p2.player_id 
+    AND p2.debt_amount BETWEEN p1.debt_amount - 10000000 AND p1.debt_amount + 10000000 
+GROUP BY p1.player_id, p1.player_number, p1.name, p1.age, p1.gender, 
+         p1.nationality, p1.debt_amount, p1.status 
+HAVING similar_debt_players > 0 
+ORDER BY similar_debt_players DESC;
+```
+
+**Purpose:** Demonstrates NON-EQUI JOIN using inequality operators (!=) and range conditions (BETWEEN). Finds players whose debt amounts fall within ±₩10M of each other.
+
+**Access:** Search Page → Special Filters → "NON-EQUI JOIN: Players with Similar Debt (±10M)"
 
 #### SELF JOIN
 ```sql
@@ -704,16 +634,85 @@ WHERE manager.role = 'Square';
 ```
 
 #### CROSS JOIN
+**Implementation Location:** `api/search_players.php` - Advanced Query: `cross_join`
+
 ```sql
--- All possible player-game combinations
+-- All possible player-game combinations (Cartesian product - LIMITED for performance)
 SELECT 
     p.player_number,
     p.name,
-    g.game_name
+    p.age,
+    p.gender,
+    p.nationality,
+    p.debt_amount,
+    p.status,
+    g.game_name,
+    g.round_number
 FROM players p
 CROSS JOIN games g
+WHERE p.player_number <= '010'
+ORDER BY p.player_number, g.round_number
 LIMIT 100;
 ```
+
+**Purpose:** Demonstrates CROSS JOIN (Cartesian product) showing all possible combinations of players and games. Limited to first 10 players for performance (10 players × 6 games = 60 rows).
+
+**Access:** Search Page → Special Filters → "CROSS JOIN: All Player-Game Combinations (Limited)"
+
+---
+
+## 🔍 Advanced Search Page Implementation
+
+The **Search Page** (`search.php` + `api/search_players.php`) provides a comprehensive demonstration of all SQL concepts with 20+ advanced query options.
+
+### **Search Page Features**
+
+#### Basic Filters (LIKE, Comparison Operators)
+- Player Number (LIKE with wildcards)
+- Name (LIKE with wildcards)
+- Gender (Exact match)
+- Age Range (BETWEEN simulation with >= and <=)
+- Nationality (LIKE)
+- Debt Range (BETWEEN simulation)
+- Status (Exact match)
+
+#### Advanced Query Options
+
+**Status-Based Queries:**
+- Alive Players with High Debt (>₩30M) - WHERE with AND
+- Eliminated Young Players (<35) - WHERE with AND
+- UNION: Alive Rich OR Eliminated Young - UNION operation
+
+**Subqueries (IN, NOT IN):**
+- Players with debt ABOVE AVERAGE - Nested SELECT with comparison
+- Players with debt BELOW AVERAGE - Nested SELECT with comparison
+- Players OLDER than average - Subquery with AVG()
+- Players YOUNGER than average - Subquery with AVG()
+- Players with MAXIMUM debt - Nested subquery with MAX()
+- Players with MINIMUM debt - Nested subquery with MIN()
+
+**Set Operations:**
+- UNION: Males OR High Debt Females - Combines two SELECT statements
+- INTERSECT: Young AND Low Debt - Simulated with multiple IN clauses
+- MINUS: Alive but NOT Young - Simulated with NOT IN
+
+**Complex Conditions:**
+- IN: Top 3 Nationalities - Subquery with GROUP BY and ORDER BY
+- NOT IN: Rare Nationalities - Subquery with HAVING
+- EXISTS: Players with Similar Debt - Correlated subquery
+
+**JOIN Operations (NEW - Lab 06):**
+- **EQUI JOIN**: Players with Game Participation - Equality conditions
+- **RIGHT JOIN**: All Games (even without players) - OUTER JOIN
+- **CROSS JOIN**: All Player-Game Combinations - Cartesian product
+- **NON-EQUI JOIN**: Players with Similar Debt - Inequality/range conditions
+
+### **Query Display Features**
+- SQL syntax highlighting with color-coded keywords
+- Result count display
+- Educational SQL query shown to user
+- Handles NULL values in JOIN results
+- Special formatting for JOIN-specific columns (game_name, similar_debt_players)
 
 ---
 
@@ -1006,10 +1005,19 @@ ON UPDATE CASCADE    -- Update child records when parent is updated
 
 ### **Lab 06: Joins**
 - ✅ INNER JOIN (player-game results)
-- ✅ LEFT/RIGHT JOIN (all players/games)
+- ✅ LEFT JOIN (all players, even without games)
+- ✅ RIGHT JOIN (all games, even without players) - **Search Page**
 - ✅ SELF JOIN (staff hierarchy) ⭐
-- ✅ CROSS JOIN (all combinations)
-- ✅ Multiple table joins
+- ✅ CROSS JOIN (all player-game combinations) - **Search Page**
+- ✅ EQUI JOIN (equality conditions) - **Search Page**
+- ✅ NON-EQUI JOIN (inequality/range conditions) - **Search Page**
+- ✅ Multiple table joins (3+ tables)
+
+**Implementation Notes:**
+- **EQUI JOIN**: `search_players.php` - Players INNER JOIN game_participation using `=` operator
+- **RIGHT JOIN**: `search_players.php` - All games RIGHT JOIN with participation data
+- **CROSS JOIN**: `search_players.php` - Cartesian product of players × games (limited to 10 players)
+- **NON-EQUI JOIN**: `search_players.php` - Players with similar debt using BETWEEN and != operators
 
 ---
 
@@ -1115,9 +1123,11 @@ GROUP BY s.staff_id;
 | Lab 05 | Set Operations | ✅ | UNION, INTERSECT simulation |
 | Lab 05 | Views | ✅ | 4 views created |
 | Lab 06 | INNER JOIN | ✅ | Player-game participation |
-| Lab 06 | OUTER JOIN | ✅ | LEFT/RIGHT joins |
+| Lab 06 | OUTER JOIN | ✅ | LEFT/RIGHT joins (search.php) |
 | Lab 06 | SELF JOIN | ✅ | Staff hierarchy ⭐ |
-| Lab 06 | CROSS JOIN | ✅ | All combinations |
+| Lab 06 | CROSS JOIN | ✅ | All combinations (search.php) |
+| Lab 06 | EQUI JOIN | ✅ | Equality conditions (search.php) |
+| Lab 06 | NON-EQUI JOIN | ✅ | Inequality/range (search.php) |
 
 **Total SQL Commands Used:** 50+  
 **Total Query Patterns:** 100+  

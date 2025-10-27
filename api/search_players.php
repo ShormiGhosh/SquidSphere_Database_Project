@@ -146,17 +146,27 @@ function buildAdvancedQuery($advancedQuery, $playerNumber, $playerName, $gender,
                     $playerNumber, $playerName, $gender, $minAge, $maxAge, $nationality, $minDebt, $maxDebt, $status, $sortBy, $limit
                 );
             
-            // IN: Top 3 nationalities
+            // IN: Top 3 nationalities (using variable to avoid LIMIT in subquery)
             case 'in_top_nationalities':
-                return buildBaseQuery(
-                    "nationality IN (SELECT nationality FROM players GROUP BY nationality ORDER BY COUNT(*) DESC LIMIT 3)",
-                    $playerNumber, $playerName, $gender, $minAge, $maxAge, $nationality, $minDebt, $maxDebt, $status, $sortBy, $limit
-                );
+                // First, get the top 3 nationalities, then use them in IN clause
+                $baseWhere = buildWhereConditions($playerNumber, $playerName, $gender, $minAge, $maxAge, 
+                                                  '', $minDebt, $maxDebt, $status);
+                return "SELECT DISTINCT p.* FROM players p 
+                        WHERE p.nationality IN (
+                            SELECT top_n.nationality FROM (
+                                SELECT nationality 
+                                FROM players 
+                                GROUP BY nationality 
+                                ORDER BY COUNT(*) DESC 
+                                LIMIT 3
+                            ) AS top_n
+                        )" . 
+                        $baseWhere . " ORDER BY $sortBy LIMIT $limit";
             
-            // NOT IN: Rare nationalities (<5 players)
+            // NOT IN: Rare nationalities (<5 players) - Shows players from RARE nationalities
             case 'not_in_rare_nationalities':
                 return buildBaseQuery(
-                    "nationality NOT IN (SELECT nationality FROM players GROUP BY nationality HAVING COUNT(*) < 5)",
+                    "nationality NOT IN (SELECT nationality FROM players GROUP BY nationality HAVING COUNT(*) >= 5)",
                     $playerNumber, $playerName, $gender, $minAge, $maxAge, $nationality, $minDebt, $maxDebt, $status, $sortBy, $limit
                 );
             
@@ -244,10 +254,15 @@ function buildWhereConditions($playerNumber, $playerName, $gender, $minAge, $max
         $conditions[] = "player_number LIKE '$playerNumber'";
     }
     
-    // LIKE for name
+    // LIKE for name (add wildcards if not present)
     if (!empty($playerName)) {
         $playerName = addslashes($playerName);
-        $conditions[] = "name LIKE '$playerName'";
+        // If user didn't add wildcards, add them automatically for partial matching
+        if (strpos($playerName, '%') === false) {
+            $conditions[] = "name LIKE '%$playerName%'";
+        } else {
+            $conditions[] = "name LIKE '$playerName'";
+        }
     }
     
     // Exact match for gender

@@ -1,11 +1,4 @@
--- =====================================================
--- SQUID SPHERE DATABASE - ADDITIONAL TABLES
--- Extends database without affecting current logic
--- =====================================================
 
--- =====================================================
--- 1. TEAMS TABLE (For Tug of War)
--- =====================================================
 CREATE TABLE IF NOT EXISTS teams (
     team_id INT AUTO_INCREMENT PRIMARY KEY,
     team_name VARCHAR(100) NOT NULL,

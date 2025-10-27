@@ -326,7 +326,6 @@ closeDBConnection($conn);
         <!-- Navigation Buttons -->
         <div class="nav-buttons">
             <a href="staff_assignments.php" class="nav-btn">View Staff Assignments →</a>
-            <a href="staff.php" class="nav-btn secondary">Text-Only View</a>
             <a href="dashboard.php" class="nav-btn secondary">← Dashboard</a>
         </div>
     </div>
